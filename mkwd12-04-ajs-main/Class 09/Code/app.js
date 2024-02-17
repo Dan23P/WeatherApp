@@ -15,7 +15,7 @@ let navigationService = {
         }
         item.classList.add("active");
     },
-    dipsplayPage: function (index) {
+    displayPage: function (index) {
         //we hide all the pages, beacuse we don't know which one is active
         for (let page of this.pages) {
             page.style.display = "none";
@@ -25,7 +25,7 @@ let navigationService = {
     registerClickEventListeners: function () {
         for (let i = 0; i < this.navItems.length; i++) {
             this.navItems[i].addEventListener("click", function (e) {
-                navigationService.dipsplayPage(i);
+                navigationService.displayPage(i);
                 navigationService.activateItem(this); // this => target of the event, the navItem that is clicked
             })
         }
@@ -61,7 +61,7 @@ let weatherApiService = {
             uiService.displayStatistcs(statisticsResult);
 
             let secondStatisticsRes = secondPageStatSer.calculateHourly(data);
-            uiService2.calculateHourly(secondStatisticsRes);
+            uiService2.displayHourly(secondStatisticsRes);
         } catch (error) {
             console.log(`An error: ${error} occured`)
         }
@@ -166,29 +166,28 @@ let statisticsService = {
 }
 let secondPageStatSer = {
     calculateHourly: function (data) {
-        let hourTable = document.createElement("table");
-
-
+        let icon = [];
+        let desc = [];
+        let date = [];
+        let hourlyTemp = [];
+        let hourlyHumid = [];
+        let windSpeed = [];
         for (i = 0; i < 40; i++) {
-            let tableRow = document.createElement("tr");
-            tableData.textContent = data.list[i].weather[0].icon;
-            tableRow.appendchild(tableData);
-            tableData.textContent = data.list[i].weather[0].description
-            tableRow.appendchild(tableData);
-            tableData.textContent = data.list[i].dt_txt
-            tableRow.appendchild(tableData);
-            tableData.textContent = data.list[i].main.temp
-            tableRow.appendchild(tableData);
-            tableData.textContent = data.list[i].main.humidity
-            tableRow.appendchild(tableData);
-            tableData.textContent = data.list[i].wind.speed
+            icon.push(data.list[i].weather[0].icon);
+
+            desc.push(data.list[i].weather[0].description);
+
+            date.push(data.list[i].dt_txt);
+
+            hourlyTemp.push(data.list[i].main.temp);
+
+            hourlyHumid.push(data.list[i].main.humidity);
+
+            windSpeed.push(data.list[i].wind.speed);
 
         }
-        hourTable.appendChild(tableRow);
-        document.getElementById("hourlyTableResult").innerHTML = "";
-        document.getElementById("hourlyTableResult").innerHTML = hourTable
+        return { icon, desc, date, hourlyTemp, hourlyHumid, windSpeed };
     }
-
 }
 
 let uiService = {
@@ -210,6 +209,43 @@ let uiService = {
             </div>
         </div>
         `
+    }
+}
+let uiService2 = {
+    displayHourly: function (secondStatisticsRes) {
+        let hourlyTableResult = document.getElementById("hourlyTableResult");
+        hourlyTableResult.innerHTML = `
+        <div class="container text-center">
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-6">
+                <div class="col">Icon</div>
+                <div class="col">Description</div>
+                <div class="col">Date and time</div>
+                <div class="col">Temp ASC DEC</div>
+                <div class="col">Humidity ASC DEC</div>
+                <div class="col">Wind speed</div>
+           </div>
+        </div>
+        `;
+
+        this.addingTable(secondStatisticsRes, hourlyTableResult);
+    },
+    addingTable: function (secondStatisticsRes, hourlyTableResult) {
+        let bootTable = "";
+        for (i = 0; i < 40; i++) {
+            bootTable += `
+            <div class="container text-center"> 
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-6">
+                    <div>${secondStatisticsRes.icon[i]}</div>
+                    <div>${secondStatisticsRes.desc[i]}</div>
+                    <div>${secondStatisticsRes.date[i]}</div>
+                    <div>${secondStatisticsRes.hourlyTemp[i]}</div>
+                    <div>${secondStatisticsRes.hourlyHumid[i]}</div>
+                    <div>${secondStatisticsRes.windSpeed[i]}</div>
+                </div>
+            </div>
+            `;
+        }
+        hourlyTableResult.innerHTML += bootTable;
     }
 }
 
